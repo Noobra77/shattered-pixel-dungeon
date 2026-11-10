@@ -1,0 +1,24 @@
+name: Build modded SPD
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get game source and apply mod
+        run: |
+          git clone --depth 1 --branch v4.0.2 https://github.com/00-Evan/shattered-pixel-dungeon.git game
+          unzip -o spd-mod-changes.zip -d game
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build debug APK
+        working-directory: game
+        run: ./gradlew android:assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SPD-mod-apk
+          path: game/android/build/outputs/apk/debug/*.apk
